@@ -71,10 +71,9 @@ class PatternCollectionGeneratorMultiple : public PatternCollectionGenerator {
         const std::shared_ptr<AbstractTask> &task) override;
 public:
     PatternCollectionGeneratorMultiple(
-        const std::shared_ptr<AbstractTask> &task, int max_pdb_size,
-        int max_collection_size, double pattern_generation_max_time,
-        double total_max_time, double stagnation_limit,
-        double blacklist_trigger_percentage,
+        int max_pdb_size, int max_collection_size,
+        double pattern_generation_max_time, double total_max_time,
+        double stagnation_limit, double blacklist_trigger_percentage,
         bool enable_blacklist_on_stagnation, int random_seed,
         utils::Verbosity verbosity);
 };

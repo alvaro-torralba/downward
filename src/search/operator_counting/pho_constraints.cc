@@ -81,7 +81,7 @@ public:
                 " Conference on Artificial Intelligence (IJCAI 2013)",
                 "2357-2364", "AAAI Press", "2013"));
 
-        add_option<shared_ptr<pdbs::TaskIndependentPatternCollectionGenerator>>(
+        add_option<shared_ptr<pdbs::PatternCollectionGenerator>>(
             "patterns", "pattern generation method", "systematic(2)");
     }
 
@@ -90,7 +90,7 @@ public:
         return components::make_auto_task_independent_component<
             PhOConstraints, ConstraintGenerator>(
             opts.get<
-                shared_ptr<pdbs::TaskIndependentPatternCollectionGenerator>>(
+                shared_ptr<pdbs::PatternCollectionGenerator>>(
                 "patterns"));
     }
 };

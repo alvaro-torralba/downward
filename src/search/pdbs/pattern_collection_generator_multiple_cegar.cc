@@ -12,14 +12,13 @@ using namespace std;
 namespace pdbs {
 PatternCollectionGeneratorMultipleCegar::
     PatternCollectionGeneratorMultipleCegar(
-        const shared_ptr<AbstractTask> &task, bool use_wildcard_plans,
-        int max_pdb_size, int max_collection_size,
+        bool use_wildcard_plans, int max_pdb_size, int max_collection_size,
         double pattern_generation_max_time, double total_max_time,
         double stagnation_limit, double blacklist_trigger_percentage,
         bool enable_blacklist_on_stagnation, int random_seed,
         utils::Verbosity verbosity)
     : PatternCollectionGeneratorMultiple(
-          task, max_pdb_size, max_collection_size, pattern_generation_max_time,
+          max_pdb_size, max_collection_size, pattern_generation_max_time,
           total_max_time, stagnation_limit, blacklist_trigger_percentage,
           enable_blacklist_on_stagnation, random_seed, verbosity),
       use_wildcard_plans(use_wildcard_plans) {
@@ -41,11 +40,11 @@ PatternInformation PatternCollectionGeneratorMultipleCegar::compute_pattern(
 }
 
 class PatternCollectionGeneratorMultipleCegarFeature
-    : public plugins::TaskIndependentFeature<
-          TaskIndependentPatternCollectionGenerator> {
+    : public plugins::TypedFeature<
+          PatternCollectionGenerator, PatternCollectionGeneratorMultipleCegar> {
 public:
     PatternCollectionGeneratorMultipleCegarFeature()
-        : TaskIndependentFeature("multiple_cegar") {
+        : TypedFeature("multiple_cegar") {
         document_title("Multiple CEGAR");
         document_synopsis(
             "This pattern collection generator implements the multiple CEGAR "
@@ -63,11 +62,10 @@ public:
         add_multiple_algorithm_implementation_notes_to_feature(*this);
     }
 
-    virtual shared_ptr<TaskIndependentPatternCollectionGenerator>
+    virtual shared_ptr<PatternCollectionGeneratorMultipleCegar>
     create_component(const plugins::Options &opts) const override {
-        return components::make_auto_task_independent_component<
-            PatternCollectionGeneratorMultipleCegar,
-            PatternCollectionGenerator>(
+        return plugins::make_shared_from_arg_tuples<
+            PatternCollectionGeneratorMultipleCegar>(
             get_cegar_wildcard_arguments_from_options(opts),
             get_multiple_arguments_from_options(opts));
     }

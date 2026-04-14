@@ -115,10 +115,10 @@ static vector<vector<int>> compute_relevant_neighbours(
 }
 
 PatternCollectionGeneratorHillclimbing::PatternCollectionGeneratorHillclimbing(
-    const shared_ptr<AbstractTask> &task, int pdb_max_size,
-    int collection_max_size, int num_samples, int min_improvement,
-    double max_time, int random_seed, utils::Verbosity verbosity)
-    : PatternCollectionGenerator(task, verbosity),
+    int pdb_max_size, int collection_max_size, int num_samples,
+    int min_improvement, double max_time, int random_seed,
+    utils::Verbosity verbosity)
+    : PatternCollectionGenerator(verbosity),
       pdb_max_size(pdb_max_size),
       collection_max_size(collection_max_size),
       num_samples(num_samples),
@@ -582,11 +582,11 @@ static basic_string<char> paper_references() {
 }
 
 class PatternCollectionGeneratorHillclimbingFeature
-    : public plugins::TaskIndependentFeature<
-          TaskIndependentPatternCollectionGenerator> {
+    : public plugins::TypedFeature<
+          PatternCollectionGenerator, PatternCollectionGeneratorHillclimbing> {
 public:
     PatternCollectionGeneratorHillclimbingFeature()
-        : TaskIndependentFeature("hillclimbing") {
+        : TypedFeature("hillclimbing") {
         document_title("Hill climbing");
         document_synopsis(
             "This algorithm uses hill climbing to generate patterns "
@@ -597,10 +597,10 @@ public:
         add_generator_options_to_feature(*this);
     }
 
-    virtual shared_ptr<TaskIndependentPatternCollectionGenerator>
-    create_component(const plugins::Options &opts) const override {
-        return components::make_auto_task_independent_component<
-            PatternCollectionGeneratorHillclimbing, PatternCollectionGenerator>(
+    virtual shared_ptr<PatternCollectionGeneratorHillclimbing> create_component(
+        const plugins::Options &opts) const override {
+        return plugins::make_shared_from_arg_tuples<
+            PatternCollectionGeneratorHillclimbing>(
             get_hillclimbing_arguments_from_options(opts),
             get_generator_arguments_from_options(opts));
     }
@@ -651,10 +651,9 @@ public:
 
     virtual shared_ptr<TaskIndependentEvaluator> create_component(
         const plugins::Options &opts) const override {
-        shared_ptr<TaskIndependentPatternCollectionGenerator> pgh =
-            components::make_auto_task_independent_component<
-                PatternCollectionGeneratorHillclimbing,
-                PatternCollectionGenerator>(
+        shared_ptr<PatternCollectionGeneratorHillclimbing> pgh =
+            plugins::make_shared_from_arg_tuples<
+                PatternCollectionGeneratorHillclimbing>(
                 get_hillclimbing_arguments_from_options(opts),
                 get_generator_arguments_from_options(opts));
 

@@ -17,9 +17,8 @@ using namespace std;
 
 namespace pdbs {
 PatternGeneratorGreedy::PatternGeneratorGreedy(
-    const shared_ptr<AbstractTask> &task, int max_states,
-    utils::Verbosity verbosity)
-    : PatternGenerator(task, verbosity), max_states(max_states) {
+    int max_states, utils::Verbosity verbosity)
+    : PatternGenerator(verbosity), max_states(max_states) {
 }
 
 string PatternGeneratorGreedy::name() const {
@@ -53,9 +52,9 @@ PatternInformation PatternGeneratorGreedy::compute_pattern(
 }
 
 class PatternGeneratorGreedyFeature
-    : public plugins::TaskIndependentFeature<TaskIndependentPatternGenerator> {
+    : public plugins::TypedFeature<PatternGenerator, PatternGeneratorGreedy> {
 public:
-    PatternGeneratorGreedyFeature() : TaskIndependentFeature("greedy") {
+    PatternGeneratorGreedyFeature() : TypedFeature("greedy") {
         document_title("Greedy");
         add_option<int>(
             "max_states",
@@ -64,10 +63,9 @@ public:
         add_generator_options_to_feature(*this);
     }
 
-    virtual shared_ptr<TaskIndependentPatternGenerator> create_component(
+    virtual shared_ptr<PatternGeneratorGreedy> create_component(
         const plugins::Options &opts) const override {
-        return components::make_auto_task_independent_component<
-            PatternGeneratorGreedy, PatternGenerator>(
+        return plugins::make_shared_from_arg_tuples<PatternGeneratorGreedy>(
             opts.get<int>("max_states"),
             get_generator_arguments_from_options(opts));
     }

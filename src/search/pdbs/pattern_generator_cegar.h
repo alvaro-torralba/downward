@@ -19,9 +19,8 @@ class PatternGeneratorCEGAR : public PatternGenerator {
         const std::shared_ptr<AbstractTask> &task) override;
 public:
     PatternGeneratorCEGAR(
-        const std::shared_ptr<AbstractTask> &task, int max_pdb_size,
-        double max_time, bool use_wildcard_plans, int random_seed,
-        utils::Verbosity verbosity);
+        int max_pdb_size, double max_time, bool use_wildcard_plans,
+        int random_seed, utils::Verbosity verbosity);
 };
 }
 

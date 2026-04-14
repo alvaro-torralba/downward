@@ -25,10 +25,10 @@ using namespace std;
 
 namespace pdbs {
 PatternCollectionGeneratorGenetic::PatternCollectionGeneratorGenetic(
-    const shared_ptr<AbstractTask> &task, int pdb_max_size, int num_collections,
-    int num_episodes, double mutation_probability, bool disjoint,
-    int random_seed, utils::Verbosity verbosity)
-    : PatternCollectionGenerator(task, verbosity),
+    int pdb_max_size, int num_collections, int num_episodes,
+    double mutation_probability, bool disjoint, int random_seed,
+    utils::Verbosity verbosity)
+    : PatternCollectionGenerator(verbosity),
       pdb_max_size(pdb_max_size),
       num_collections(num_collections),
       num_episodes(num_episodes),
@@ -304,11 +304,10 @@ PatternCollectionGeneratorGenetic::compute_patterns(
 }
 
 class PatternCollectionGeneratorGeneticFeature
-    : public plugins::TaskIndependentFeature<
-          TaskIndependentPatternCollectionGenerator> {
+    : public plugins::TypedFeature<
+          PatternCollectionGenerator, PatternCollectionGeneratorGenetic> {
 public:
-    PatternCollectionGeneratorGeneticFeature()
-        : TaskIndependentFeature("genetic") {
+    PatternCollectionGeneratorGeneticFeature() : TypedFeature("genetic") {
         document_title("Genetic algorithm patterns");
         document_synopsis(
             "The following paper describes the automated creation of pattern "
@@ -389,10 +388,10 @@ public:
         document_language_support("axioms", "not supported");
     }
 
-    virtual shared_ptr<TaskIndependentPatternCollectionGenerator>
-    create_component(const plugins::Options &opts) const override {
-        return components::make_auto_task_independent_component<
-            PatternCollectionGeneratorGenetic, PatternCollectionGenerator>(
+    virtual shared_ptr<PatternCollectionGeneratorGenetic> create_component(
+        const plugins::Options &opts) const override {
+        return plugins::make_shared_from_arg_tuples<
+            PatternCollectionGeneratorGenetic>(
             opts.get<int>("pdb_max_size"), opts.get<int>("num_collections"),
             opts.get<int>("num_episodes"),
             opts.get<double>("mutation_probability"),

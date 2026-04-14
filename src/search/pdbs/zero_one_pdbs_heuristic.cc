@@ -51,7 +51,7 @@ public:
             "into account for one pattern (the first one which it affects) and set "
             "to zero for all other affected patterns.");
 
-        add_option<shared_ptr<TaskIndependentPatternCollectionGenerator>>(
+        add_option<shared_ptr<PatternCollectionGenerator>>(
             "patterns", "pattern generation method", "systematic(1)");
         add_heuristic_options_to_feature(*this, "zopdbs");
 
@@ -69,7 +69,7 @@ public:
         const plugins::Options &opts) const override {
         return components::make_auto_task_independent_component<
             ZeroOnePDBsHeuristic, Evaluator>(
-            opts.get<shared_ptr<TaskIndependentPatternCollectionGenerator>>(
+            opts.get<shared_ptr<PatternCollectionGenerator>>(
                 "patterns"),
             get_heuristic_arguments_from_options(opts));
     }

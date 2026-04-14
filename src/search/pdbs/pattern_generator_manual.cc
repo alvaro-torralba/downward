@@ -13,9 +13,8 @@ using namespace std;
 
 namespace pdbs {
 PatternGeneratorManual::PatternGeneratorManual(
-    const shared_ptr<AbstractTask> &task, const vector<int> &pattern,
-    utils::Verbosity verbosity)
-    : PatternGenerator(task, verbosity), pattern(pattern) {
+    const vector<int> &pattern, utils::Verbosity verbosity)
+    : PatternGenerator(verbosity), pattern(pattern) {
 }
 
 string PatternGeneratorManual::name() const {
@@ -32,9 +31,9 @@ PatternInformation PatternGeneratorManual::compute_pattern(
 }
 
 class PatternGeneratorManualFeature
-    : public plugins::TaskIndependentFeature<TaskIndependentPatternGenerator> {
+    : public plugins::TypedFeature<PatternGenerator, PatternGeneratorManual> {
 public:
-    PatternGeneratorManualFeature() : TaskIndependentFeature("manual_pattern") {
+    PatternGeneratorManualFeature() : TypedFeature("manual_pattern") {
         document_title("Manual pattern");
         add_list_option<int>(
             "pattern",
@@ -43,10 +42,9 @@ public:
         add_generator_options_to_feature(*this);
     }
 
-    virtual shared_ptr<TaskIndependentPatternGenerator> create_component(
+    virtual shared_ptr<PatternGeneratorManual> create_component(
         const plugins::Options &opts) const override {
-        return components::make_auto_task_independent_component<
-            PatternGeneratorManual, PatternGenerator>(
+        return plugins::make_shared_from_arg_tuples<PatternGeneratorManual>(
             opts.get_list<int>("pattern"),
             get_generator_arguments_from_options(opts));
     }
