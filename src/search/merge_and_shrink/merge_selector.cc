@@ -30,10 +30,6 @@ static vector<pair<int, int>> compute_merge_candidates(
     return merge_candidates;
 }
 
-MergeSelector::MergeSelector(const shared_ptr<AbstractTask> &task)
-    : components::TaskSpecificComponent(task) {
-}
-
 pair<int, int> MergeSelector::select_merge(
     const FactoredTransitionSystem &fts) const {
     return select_merge_from_candidates(fts, compute_merge_candidates(fts));
@@ -48,7 +44,7 @@ void MergeSelector::dump_options(utils::LogProxy &log) const {
 }
 
 static class MergeSelectorCategoryPlugin
-    : public plugins::TypedCategoryPlugin<TaskIndependentMergeSelector> {
+    : public plugins::TypedCategoryPlugin<MergeSelector> {
 public:
     MergeSelectorCategoryPlugin() : TypedCategoryPlugin("MergeSelector") {
         document_synopsis(

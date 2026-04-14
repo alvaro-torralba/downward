@@ -32,9 +32,9 @@ static bool compare_sccs_decreasing(
 }
 
 MergeStrategyFactorySCCs::MergeStrategyFactorySCCs(
-    const shared_ptr<AbstractTask> &task, const OrderOfSCCs &order_of_sccs,
+    const OrderOfSCCs &order_of_sccs,
     const shared_ptr<MergeSelector> &merge_selector, utils::Verbosity verbosity)
-    : MergeStrategyFactory(task, verbosity),
+    : MergeStrategyFactory(verbosity),
       order_of_sccs(order_of_sccs),
       merge_selector(merge_selector) {
 }
@@ -137,10 +137,10 @@ string MergeStrategyFactorySCCs::name() const {
 }
 
 class MergeStrategyFactorySCCsFeature
-    : public plugins::TaskIndependentFeature<
-          TaskIndependentMergeStrategyFactory> {
+    : public plugins::TypedFeature<
+          MergeStrategyFactory, MergeStrategyFactorySCCs> {
 public:
-    MergeStrategyFactorySCCsFeature() : TaskIndependentFeature("merge_sccs") {
+    MergeStrategyFactorySCCsFeature() : TypedFeature("merge_sccs") {
         document_title("Merge strategy SCCs");
         document_synopsis(
             "This merge strategy implements the algorithm described in the paper " +
@@ -162,18 +162,16 @@ public:
 
         add_option<OrderOfSCCs>(
             "order_of_sccs", "how the SCCs should be ordered", "topological");
-        add_option<shared_ptr<TaskIndependentMergeSelector>>(
+        add_option<shared_ptr<MergeSelector>>(
             "merge_selector", "the fallback merge strategy to use");
         add_merge_strategy_options_to_feature(*this);
     }
 
-    virtual shared_ptr<TaskIndependentMergeStrategyFactory> create_component(
+    virtual shared_ptr<MergeStrategyFactorySCCs> create_component(
         const plugins::Options &opts) const override {
-        return components::make_auto_task_independent_component<
-            MergeStrategyFactorySCCs, MergeStrategyFactory>(
+        return plugins::make_shared_from_arg_tuples<MergeStrategyFactorySCCs>(
             opts.get<OrderOfSCCs>("order_of_sccs"),
-            opts.get<shared_ptr<TaskIndependentMergeSelector>>(
-                "merge_selector"),
+            opts.get<shared_ptr<MergeSelector>>("merge_selector"),
             get_merge_strategy_arguments_from_options(opts));
     }
 };

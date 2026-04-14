@@ -7,10 +7,8 @@
 using namespace std;
 
 namespace merge_and_shrink {
-MergeStrategyFactory::MergeStrategyFactory(
-    const shared_ptr<AbstractTask> &task, utils::Verbosity verbosity)
-    : components::TaskSpecificComponent(task),
-      log(utils::get_log_for_verbosity(verbosity)) {
+MergeStrategyFactory::MergeStrategyFactory(utils::Verbosity verbosity)
+    : log(utils::get_log_for_verbosity(verbosity)) {
 }
 
 void MergeStrategyFactory::dump_options() const {
@@ -31,7 +29,7 @@ tuple<utils::Verbosity> get_merge_strategy_arguments_from_options(
 }
 
 static class MergeStrategyFactoryCategoryPlugin
-    : public plugins::TypedCategoryPlugin<TaskIndependentMergeStrategyFactory> {
+    : public plugins::TypedCategoryPlugin<MergeStrategyFactory> {
 public:
     MergeStrategyFactoryCategoryPlugin()
         : TypedCategoryPlugin("MergeStrategy") {

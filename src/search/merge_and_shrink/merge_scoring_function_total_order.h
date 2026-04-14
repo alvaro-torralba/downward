@@ -38,8 +38,7 @@ class MergeScoringFunctionTotalOrder : public MergeScoringFunction {
     virtual void dump_function_specific_options(
         utils::LogProxy &log) const override;
 public:
-    MergeScoringFunctionTotalOrder(
-        const std::shared_ptr<AbstractTask> &task,
+    explicit MergeScoringFunctionTotalOrder(
         AtomicTSOrder atomic_ts_order, ProductTSOrder product_ts_order,
         bool atomic_before_product, int random_seed);
     virtual std::vector<double> compute_scores(

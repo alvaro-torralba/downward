@@ -32,9 +32,7 @@ protected:
         utils::LogProxy &log) const override;
     virtual std::string name() const override;
 public:
-    ShrinkBisimulation(
-        const std::shared_ptr<AbstractTask> &task, bool greedy,
-        AtLimit at_limit);
+    explicit ShrinkBisimulation(bool greedy, AtLimit at_limit);
     virtual StateEquivalenceRelation compute_equivalence_relation(
         const TransitionSystem &ts, const Distances &distances, int target_size,
         utils::LogProxy &log) const override;

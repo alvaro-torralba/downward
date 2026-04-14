@@ -11,10 +11,6 @@
 using namespace std;
 
 namespace merge_and_shrink {
-ShrinkStrategy::ShrinkStrategy(const shared_ptr<AbstractTask> &task)
-    : components::TaskSpecificComponent(task) {
-}
-
 void ShrinkStrategy::dump_options(utils::LogProxy &log) const {
     if (log.is_at_least_normal()) {
         log << "Shrink strategy options: " << endl;
@@ -28,7 +24,7 @@ string ShrinkStrategy::get_name() const {
 }
 
 static class ShrinkStrategyCategoryPlugin
-    : public plugins::TypedCategoryPlugin<TaskIndependentShrinkStrategy> {
+    : public plugins::TypedCategoryPlugin<ShrinkStrategy> {
 public:
     ShrinkStrategyCategoryPlugin() : TypedCategoryPlugin("ShrinkStrategy") {
         document_synopsis(

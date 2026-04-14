@@ -27,11 +27,9 @@ using utils::ExitCode;
 
 namespace merge_and_shrink {
 LabelReduction::LabelReduction(
-    const shared_ptr<AbstractTask> &task, bool before_shrinking,
-    bool before_merging, LabelReductionMethod method,
+    bool before_shrinking, bool before_merging, LabelReductionMethod method,
     LabelReductionSystemOrder system_order, int random_seed)
-    : components::TaskSpecificComponent(task),
-      lr_before_shrinking(before_shrinking),
+    : lr_before_shrinking(before_shrinking),
       lr_before_merging(before_merging),
       lr_method(method),
       lr_system_order(system_order),
@@ -296,9 +294,9 @@ void LabelReduction::dump_options(utils::LogProxy &log) const {
 }
 
 class LabelReductionFeature
-    : public plugins::TaskIndependentFeature<TaskIndependentLabelReduction> {
+    : public plugins::TypedFeature<LabelReduction, LabelReduction> {
 public:
-    LabelReductionFeature() : TaskIndependentFeature("exact") {
+    LabelReductionFeature() : TypedFeature("exact") {
         document_title("Exact generalized label reduction");
         document_synopsis(
             "This class implements the exact generalized label reduction "
@@ -340,10 +338,9 @@ public:
         utils::add_rng_options_to_feature(*this);
     }
 
-    virtual shared_ptr<TaskIndependentLabelReduction> create_component(
+    virtual shared_ptr<LabelReduction> create_component(
         const plugins::Options &opts) const override {
-        return components::make_auto_task_independent_component<
-            LabelReduction, LabelReduction>(
+        return plugins::make_shared_from_arg_tuples<LabelReduction>(
             opts.get<bool>("before_shrinking"),
             opts.get<bool>("before_merging"),
             opts.get<LabelReductionMethod>("method"),
@@ -355,7 +352,7 @@ public:
 static plugins::FeaturePlugin<LabelReductionFeature> _plugin;
 
 static class LabelReductionCategoryPlugin
-    : public plugins::TypedCategoryPlugin<TaskIndependentLabelReduction> {
+    : public plugins::TypedCategoryPlugin<LabelReduction> {
 public:
     LabelReductionCategoryPlugin() : TypedCategoryPlugin("LabelReduction") {
         document_synopsis(

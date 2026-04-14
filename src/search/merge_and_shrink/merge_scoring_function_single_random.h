@@ -18,8 +18,7 @@ class MergeScoringFunctionSingleRandom : public MergeScoringFunction {
     virtual void dump_function_specific_options(
         utils::LogProxy &log) const override;
 public:
-    MergeScoringFunctionSingleRandom(
-        const std::shared_ptr<AbstractTask> &task, int random_seed);
+    explicit MergeScoringFunctionSingleRandom(int random_seed);
     virtual std::vector<double> compute_scores(
         const FactoredTransitionSystem &fts,
         const std::vector<std::pair<int, int>> &merge_candidates) override;

@@ -59,11 +59,6 @@ static vector<int> compute_label_ranks(
     return label_ranks;
 }
 
-MergeScoringFunctionDFP::MergeScoringFunctionDFP(
-    const shared_ptr<AbstractTask> &task)
-    : MergeScoringFunction(task) {
-}
-
 vector<double> MergeScoringFunctionDFP::compute_scores(
     const FactoredTransitionSystem &fts,
     const vector<pair<int, int>> &merge_candidates) {
@@ -107,10 +102,10 @@ string MergeScoringFunctionDFP::name() const {
 }
 
 class MergeScoringFunctionDFPFeature
-    : public plugins::TaskIndependentFeature<
-          TaskIndependentMergeScoringFunction> {
+    : public plugins::TypedFeature<
+          MergeScoringFunction, MergeScoringFunctionDFP> {
 public:
-    MergeScoringFunctionDFPFeature() : TaskIndependentFeature("dfp") {
+    MergeScoringFunctionDFPFeature() : TypedFeature("dfp") {
         document_title("DFP scoring");
         document_synopsis(
             "This scoring function computes the 'DFP' score as described in the "
@@ -143,10 +138,9 @@ public:
             "   threshold_before_merge=1)\n}}}");
     }
 
-    virtual shared_ptr<TaskIndependentMergeScoringFunction> create_component(
+    virtual shared_ptr<MergeScoringFunctionDFP> create_component(
         const plugins::Options &) const override {
-        return components::make_auto_task_independent_component<
-            MergeScoringFunctionDFP, MergeScoringFunction>();
+        return make_shared<MergeScoringFunctionDFP>();
     }
 };
 

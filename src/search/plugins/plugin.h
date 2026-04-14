@@ -74,6 +74,53 @@ public:
     const std::vector<NoteInfo> &get_notes() const;
 };
 
+template<typename Constructed>
+class FeatureWithDefault : public Feature {
+protected:
+    using Feature::Feature;
+    virtual std::shared_ptr<Constructed> create_component(
+        const Options &options) const {
+        return std::make_shared<Constructed>(options);
+    }
+};
+
+template<typename Constructed>
+class FeatureWithoutDefault : public Feature {
+protected:
+    using Feature::Feature;
+    virtual std::shared_ptr<Constructed> create_component(
+        const Options &) const = 0;
+};
+
+template<typename Constructed>
+using FeatureAuto = typename std::conditional<
+    std::is_constructible<Constructed, const Options &>::value,
+    FeatureWithDefault<Constructed>, FeatureWithoutDefault<Constructed>>::type;
+
+template<typename Base, typename Constructed>
+class TypedFeature : public FeatureAuto<Constructed> {
+    using BasePtr = std::shared_ptr<Base>;
+    static_assert(
+        std::is_base_of<Base, Constructed>::value,
+        "Constructed must derive from Base");
+public:
+    TypedFeature(const std::string &key)
+        : FeatureAuto<Constructed>(
+              TypeRegistry::instance()->get_type<BasePtr>(), key) {
+    }
+
+    Any construct(
+        const Options &options, const utils::Context &context) const override {
+        std::shared_ptr<Base> ptr;
+        try {
+            ptr = this->create_component(options);
+        } catch (const utils::ComponentArgumentError &e) {
+            context.error(e.get_message());
+        }
+        return Any(ptr);
+    }
+};
+
 template<typename ComponentType>
 class TaskIndependentFeature : public Feature {
     using ComponentTypePtr = std::shared_ptr<ComponentType>;

@@ -13,10 +13,8 @@ using namespace std;
 
 namespace merge_and_shrink {
 MergeScoringFunctionSingleRandom::MergeScoringFunctionSingleRandom(
-    const shared_ptr<AbstractTask> &task, int random_seed)
-    : MergeScoringFunction(task),
-      random_seed(random_seed),
-      rng(utils::get_rng(random_seed)) {
+    int random_seed)
+    : random_seed(random_seed), rng(utils::get_rng(random_seed)) {
 }
 
 vector<double> MergeScoringFunctionSingleRandom::compute_scores(
@@ -48,11 +46,10 @@ void MergeScoringFunctionSingleRandom::dump_function_specific_options(
 }
 
 class MergeScoringFunctionSingleRandomFeature
-    : public plugins::TaskIndependentFeature<
-          TaskIndependentMergeScoringFunction> {
+    : public plugins::TypedFeature<
+          MergeScoringFunction, MergeScoringFunctionSingleRandom> {
 public:
-    MergeScoringFunctionSingleRandomFeature()
-        : TaskIndependentFeature("single_random") {
+    MergeScoringFunctionSingleRandomFeature() : TypedFeature("single_random") {
         document_title("Single random");
         document_synopsis(
             "This scoring function assigns exactly one merge candidate a score of "
@@ -61,10 +58,10 @@ public:
         utils::add_rng_options_to_feature(*this);
     }
 
-    virtual shared_ptr<TaskIndependentMergeScoringFunction> create_component(
+    virtual shared_ptr<MergeScoringFunctionSingleRandom> create_component(
         const plugins::Options &opts) const override {
-        return components::make_auto_task_independent_component<
-            MergeScoringFunctionSingleRandom, MergeScoringFunction>(
+        return plugins::make_shared_from_arg_tuples<
+            MergeScoringFunctionSingleRandom>(
             utils::get_rng_arguments_from_options(opts));
     }
 };

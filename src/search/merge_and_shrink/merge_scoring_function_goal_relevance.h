@@ -7,8 +7,7 @@ namespace merge_and_shrink {
 class MergeScoringFunctionGoalRelevance : public MergeScoringFunction {
     virtual std::string name() const override;
 public:
-    explicit MergeScoringFunctionGoalRelevance(
-        const std::shared_ptr<AbstractTask> &task);
+    MergeScoringFunctionGoalRelevance() = default;
     virtual std::vector<double> compute_scores(
         const FactoredTransitionSystem &fts,
         const std::vector<std::pair<int, int>> &merge_candidates) override;

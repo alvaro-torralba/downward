@@ -19,7 +19,6 @@ protected:
         utils::LogProxy &log) const override;
 public:
     MergeTreeFactoryLinear(
-        const std::shared_ptr<AbstractTask> &task,
         variable_order_finder::VariableOrderType variable_order,
         int random_seed, UpdateOption update_option);
     virtual std::unique_ptr<MergeTree> compute_merge_tree(

@@ -49,9 +49,35 @@ struct BoundArgs<T> {
     using type = T;
 };
 
-template<TaskIndependentType T>
+/*
+  SFINAE-based trait to detect whether T has a BoundType member type.
+  This is used as a proxy for detecting TaskIndependentComponent types
+  without requiring T to be complete (unlike std::derived_from).
+*/
+template<typename T, typename = void>
+struct HasBoundType : std::false_type {};
+
+template<typename T>
+struct HasBoundType<T, std::void_t<typename T::BoundType>> : std::true_type {};
+
+/*
+  Helper to compute the bound type for shared_ptr<T>: if T is a
+  task-independent component (has BoundType), use T::BoundType;
+  otherwise, pass through the shared_ptr unchanged.
+*/
+template<typename T, typename = void>
+struct SharedPtrBoundArgs {
+    using type = std::shared_ptr<T>;
+};
+
+template<typename T>
+struct SharedPtrBoundArgs<T, std::void_t<typename T::BoundType>> {
+    using type = T::BoundType;
+};
+
+template<typename T>
 struct BoundArgs<std::shared_ptr<T>> {
-    using type = typename T::BoundType;
+    using type = SharedPtrBoundArgs<T>::type;
 };
 
 template<typename T>
@@ -65,7 +91,7 @@ struct BoundArgs<std::tuple<Ts...>> {
 };
 
 template<typename T>
-using BoundArgs_t = typename BoundArgs<std::decay_t<T>>::type;
+using BoundArgs_t = BoundArgs<std::decay_t<T>>::type;
 
 template<typename Args, typename T>
 concept ComponentArgsFor = utils::ConstructibleFromArgsTuple<
@@ -77,14 +103,18 @@ concept ComponentTypeOf =
     std::derived_from<ComponentType, TaskSpecificComponent> &&
     std::derived_from<T, ComponentType>;
 
-template<TaskIndependentType T>
+template<typename T>
 BoundArgs_t<std::shared_ptr<T>> bind_task_recursively(
     const std::shared_ptr<T> &component,
-    const std::shared_ptr<AbstractTask> &task) {
-    if (component) {
-        return component->bind_task(task);
+    [[maybe_unused]] const std::shared_ptr<AbstractTask> &task) {
+    if constexpr (HasBoundType<T>::value) {
+        if (component) {
+            return component->bind_task(task);
+        }
+        return nullptr;
+    } else {
+        return component;
     }
-    return nullptr;
 }
 
 template<BasicType T>
@@ -120,13 +150,15 @@ void collect_task_preserving_components(
     const T &, std::vector<TaskIndependentComponentBase *> &) {
 }
 
-template<TaskIndependentType T>
+template<typename T>
 void collect_task_preserving_components(
     const std::shared_ptr<T> &component,
-    std::vector<TaskIndependentComponentBase *> &out) {
-    if (component) {
-        out.push_back(component.get());
-        component->get_task_preserving_subcomponents(out);
+    [[maybe_unused]] std::vector<TaskIndependentComponentBase *> &out) {
+    if constexpr (HasBoundType<T>::value) {
+        if (component) {
+            out.push_back(component.get());
+            component->get_task_preserving_subcomponents(out);
+        }
     }
 }
 

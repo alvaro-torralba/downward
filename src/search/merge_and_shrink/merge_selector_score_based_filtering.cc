@@ -11,9 +11,8 @@ using namespace std;
 
 namespace merge_and_shrink {
 MergeSelectorScoreBasedFiltering::MergeSelectorScoreBasedFiltering(
-    const shared_ptr<AbstractTask> &task,
     const vector<shared_ptr<MergeScoringFunction>> &scoring_functions)
-    : MergeSelector(task), merge_scoring_functions(scoring_functions) {
+    : merge_scoring_functions(scoring_functions) {
 }
 
 static vector<pair<int, int>> get_remaining_candidates(
@@ -102,26 +101,26 @@ bool MergeSelectorScoreBasedFiltering::requires_goal_distances() const {
 }
 
 class MergeSelectorScoreBasedFilteringFeature
-    : public plugins::TaskIndependentFeature<TaskIndependentMergeSelector> {
+    : public plugins::TypedFeature<
+          MergeSelector, MergeSelectorScoreBasedFiltering> {
 public:
     MergeSelectorScoreBasedFilteringFeature()
-        : TaskIndependentFeature("score_based_filtering") {
+        : TypedFeature("score_based_filtering") {
         document_title("Score based filtering merge selector");
         document_synopsis(
             "This merge selector has a list of scoring functions, which are used "
             "iteratively to compute scores for merge candidates, keeping the best "
             "ones (with minimal scores) until only one is left.");
 
-        add_list_option<shared_ptr<TaskIndependentMergeScoringFunction>>(
+        add_list_option<shared_ptr<MergeScoringFunction>>(
             "scoring_functions",
             "The list of scoring functions used to compute scores for candidates.");
     }
 
-    virtual shared_ptr<TaskIndependentMergeSelector> create_component(
+    virtual shared_ptr<MergeSelectorScoreBasedFiltering> create_component(
         const plugins::Options &opts) const override {
-        return components::make_auto_task_independent_component<
-            MergeSelectorScoreBasedFiltering, MergeSelector>(
-            opts.get_list<shared_ptr<TaskIndependentMergeScoringFunction>>(
+        return make_shared<MergeSelectorScoreBasedFiltering>(
+            opts.get_list<shared_ptr<MergeScoringFunction>>(
                 "scoring_functions"));
     }
 };
