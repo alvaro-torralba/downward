@@ -84,8 +84,8 @@ class LandmarkFactoryRpgSasp : public LandmarkFactoryRelaxation {
     void discard_disjunctive_landmarks() const;
 public:
     LandmarkFactoryRpgSasp(
-        const std::shared_ptr<AbstractTask> &task, bool disjunctive_landmarks,
-        bool use_orders, utils::Verbosity verbosity);
+        bool disjunctive_landmarks, bool use_orders,
+        utils::Verbosity verbosity);
 
     virtual bool supports_conditional_effects() const override;
 };

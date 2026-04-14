@@ -576,9 +576,9 @@ void LandmarkFactoryHM::build_pm_operators(const TaskProxy &task_proxy) {
 }
 
 LandmarkFactoryHM::LandmarkFactoryHM(
-    const shared_ptr<AbstractTask> &task, int m, bool conjunctive_landmarks,
-    bool use_orders, utils::Verbosity verbosity)
-    : LandmarkFactory(task, verbosity),
+    int m, bool conjunctive_landmarks, bool use_orders,
+    utils::Verbosity verbosity)
+    : LandmarkFactory(verbosity),
       m(m),
       conjunctive_landmarks(conjunctive_landmarks),
       use_orders(use_orders) {
@@ -1043,9 +1043,9 @@ bool LandmarkFactoryHM::supports_conditional_effects() const {
 }
 
 class LandmarkFactoryHMFeature
-    : public plugins::TaskIndependentFeature<TaskIndependentLandmarkFactory> {
+    : public plugins::TypedFeature<LandmarkFactory, LandmarkFactoryHM> {
 public:
-    LandmarkFactoryHMFeature() : TaskIndependentFeature("lm_hm") {
+    LandmarkFactoryHMFeature() : TypedFeature("lm_hm") {
         // document_group("");
         document_title("h^m landmarks");
         document_synopsis(
@@ -1070,10 +1070,9 @@ public:
             "conditional_effects", "ignored, i.e. not supported");
     }
 
-    virtual shared_ptr<TaskIndependentLandmarkFactory> create_component(
+    virtual shared_ptr<LandmarkFactoryHM> create_component(
         const plugins::Options &opts) const override {
-        return components::make_auto_task_independent_component<
-            LandmarkFactoryHM, LandmarkFactory>(
+        return plugins::make_shared_from_arg_tuples<LandmarkFactoryHM>(
             opts.get<int>("m"), opts.get<bool>("conjunctive_landmarks"),
             get_use_orders_arguments_from_options(opts),
             get_landmark_factory_arguments_from_options(opts));

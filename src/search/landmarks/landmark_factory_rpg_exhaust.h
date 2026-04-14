@@ -14,9 +14,8 @@ class LandmarkFactoryRpgExhaust : public LandmarkFactoryRelaxation {
         Exploration &exploration) override;
 
 public:
-    LandmarkFactoryRpgExhaust(
-        const std::shared_ptr<AbstractTask> &task, bool use_unary_relaxation,
-        utils::Verbosity verbosity);
+    explicit LandmarkFactoryRpgExhaust(
+        bool use_unary_relaxation, utils::Verbosity verbosity);
 
     virtual bool supports_conditional_effects() const override;
 };

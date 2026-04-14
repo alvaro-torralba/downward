@@ -30,7 +30,6 @@ class LandmarkFactoryReasonableOrdersHPS : public LandmarkFactory {
         const Landmark &landmark_b) const;
 public:
     LandmarkFactoryReasonableOrdersHPS(
-        const std::shared_ptr<AbstractTask> &task,
         const std::shared_ptr<LandmarkFactory> &lm_factory,
         utils::Verbosity verbosity);
 

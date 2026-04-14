@@ -16,9 +16,8 @@ using namespace std;
 
 namespace landmarks {
 LandmarkFactoryZhuGivan::LandmarkFactoryZhuGivan(
-    const shared_ptr<AbstractTask> &task, bool use_orders,
-    utils::Verbosity verbosity)
-    : LandmarkFactoryRelaxation(task, verbosity), use_orders(use_orders) {
+    bool use_orders, utils::Verbosity verbosity)
+    : LandmarkFactoryRelaxation(verbosity), use_orders(use_orders) {
 }
 
 void LandmarkFactoryZhuGivan::generate_relaxed_landmarks(
@@ -314,9 +313,9 @@ bool LandmarkFactoryZhuGivan::supports_conditional_effects() const {
 }
 
 class LandmarkFactoryZhuGivanFeature
-    : public plugins::TaskIndependentFeature<TaskIndependentLandmarkFactory> {
+    : public plugins::TypedFeature<LandmarkFactory, LandmarkFactoryZhuGivan> {
 public:
-    LandmarkFactoryZhuGivanFeature() : TaskIndependentFeature("lm_zg") {
+    LandmarkFactoryZhuGivanFeature() : TypedFeature("lm_zg") {
         document_title("Zhu/Givan landmarks");
         document_synopsis("The landmark generation method introduced by "
                           "Zhu & Givan (ICAPS 2003 Doctoral Consortium).");
@@ -329,10 +328,9 @@ public:
             "We think they are supported, but this is not 100% sure.");
     }
 
-    virtual shared_ptr<TaskIndependentLandmarkFactory> create_component(
+    virtual shared_ptr<LandmarkFactoryZhuGivan> create_component(
         const plugins::Options &opts) const override {
-        return components::make_auto_task_independent_component<
-            LandmarkFactoryZhuGivan, LandmarkFactory>(
+        return plugins::make_shared_from_arg_tuples<LandmarkFactoryZhuGivan>(
             get_use_orders_arguments_from_options(opts),
             get_landmark_factory_arguments_from_options(opts));
     }

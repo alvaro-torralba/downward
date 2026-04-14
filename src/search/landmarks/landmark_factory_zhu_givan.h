@@ -81,9 +81,7 @@ class LandmarkFactoryZhuGivan : public LandmarkFactoryRelaxation {
         Exploration &exploration) override;
 
 public:
-    LandmarkFactoryZhuGivan(
-        const std::shared_ptr<AbstractTask> &task, bool use_orders,
-        utils::Verbosity verbosity);
+    LandmarkFactoryZhuGivan(bool use_orders, utils::Verbosity verbosity);
 
     virtual bool supports_conditional_effects() const override;
 };

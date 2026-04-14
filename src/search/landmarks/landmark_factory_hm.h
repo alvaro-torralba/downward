@@ -233,8 +233,7 @@ class LandmarkFactoryHM : public LandmarkFactory {
 
 public:
     LandmarkFactoryHM(
-        const std::shared_ptr<AbstractTask> &task, int m,
-        bool conjunctive_landmarks, bool use_orders,
+        int m, bool conjunctive_landmarks, bool use_orders,
         utils::Verbosity verbosity);
 
     virtual bool supports_conditional_effects() const override;

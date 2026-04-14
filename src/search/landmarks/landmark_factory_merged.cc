@@ -16,10 +16,9 @@ namespace landmarks {
 class LandmarkNode;
 
 LandmarkFactoryMerged::LandmarkFactoryMerged(
-    const shared_ptr<AbstractTask> &task,
     const vector<shared_ptr<LandmarkFactory>> &lm_factories,
     utils::Verbosity verbosity)
-    : LandmarkFactory(task, verbosity), landmark_factories(lm_factories) {
+    : LandmarkFactory(verbosity), landmark_factories(lm_factories) {
     utils::verify_list_not_empty(lm_factories, "lm_factories");
 }
 
@@ -173,15 +172,14 @@ bool LandmarkFactoryMerged::supports_conditional_effects() const {
 }
 
 class LandmarkFactoryMergedFeature
-    : public plugins::TaskIndependentFeature<TaskIndependentLandmarkFactory> {
+    : public plugins::TypedFeature<LandmarkFactory, LandmarkFactoryMerged> {
 public:
-    LandmarkFactoryMergedFeature() : TaskIndependentFeature("lm_merged") {
+    LandmarkFactoryMergedFeature() : TypedFeature("lm_merged") {
         document_title("Merged landmarks");
         document_synopsis(
             "Merges the landmarks and orderings from the parameter landmarks");
 
-        add_list_option<shared_ptr<TaskIndependentLandmarkFactory>>(
-            "lm_factories");
+        add_list_option<shared_ptr<LandmarkFactory>>("lm_factories");
         add_landmark_factory_options_to_feature(*this);
 
         document_note(
@@ -196,12 +194,10 @@ public:
             "conditional_effects", "supported if all components support them");
     }
 
-    virtual shared_ptr<TaskIndependentLandmarkFactory> create_component(
+    virtual shared_ptr<LandmarkFactoryMerged> create_component(
         const plugins::Options &opts) const override {
-        return components::make_auto_task_independent_component<
-            LandmarkFactoryMerged, LandmarkFactory>(
-            opts.get_list<shared_ptr<TaskIndependentLandmarkFactory>>(
-                "lm_factories"),
+        return plugins::make_shared_from_arg_tuples<LandmarkFactoryMerged>(
+            opts.get_list<shared_ptr<LandmarkFactory>>("lm_factories"),
             get_landmark_factory_arguments_from_options(opts));
     }
 };
