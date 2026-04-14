@@ -91,7 +91,7 @@ public:
                 "Journal of Artificial Intelligence Research", "62", "535-577",
                 "2018"));
 
-        add_list_option<shared_ptr<TaskIndependentSubtaskGenerator>>(
+        add_list_option<shared_ptr<SubtaskGenerator>>(
             "subtasks", "subtask generators", "[landmarks(),goals()]");
         add_option<int>(
             "max_states",
@@ -128,7 +128,7 @@ public:
         const plugins::Options &opts) const override {
         return components::make_auto_task_independent_component<
             AdditiveCartesianHeuristic, Evaluator>(
-            opts.get_list<shared_ptr<TaskIndependentSubtaskGenerator>>(
+            opts.get_list<shared_ptr<SubtaskGenerator>>(
                 "subtasks"),
             opts.get<int>("max_states"), opts.get<int>("max_transitions"),
             opts.get<double>("max_time"), opts.get<PickSplit>("pick"),

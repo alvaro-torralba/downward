@@ -93,12 +93,7 @@ static Facts filter_and_order_facts(
     return facts;
 }
 
-SubtaskGenerator::SubtaskGenerator(const shared_ptr<AbstractTask> &task)
-    : components::TaskSpecificComponent(task) {
-}
-
-TaskDuplicator::TaskDuplicator(const shared_ptr<AbstractTask> &task, int copies)
-    : SubtaskGenerator(task), num_copies(copies) {
+TaskDuplicator::TaskDuplicator(int copies) : num_copies(copies) {
 }
 
 SharedTasks TaskDuplicator::get_subtasks(
@@ -111,11 +106,8 @@ SharedTasks TaskDuplicator::get_subtasks(
     return subtasks;
 }
 
-GoalDecomposition::GoalDecomposition(
-    const shared_ptr<AbstractTask> &task, FactOrder order, int random_seed)
-    : SubtaskGenerator(task),
-      fact_order(order),
-      rng(utils::get_rng(random_seed)) {
+GoalDecomposition::GoalDecomposition(FactOrder order, int random_seed)
+    : fact_order(order), rng(utils::get_rng(random_seed)) {
 }
 
 SharedTasks GoalDecomposition::get_subtasks(
@@ -133,10 +125,8 @@ SharedTasks GoalDecomposition::get_subtasks(
 }
 
 LandmarkDecomposition::LandmarkDecomposition(
-    const shared_ptr<AbstractTask> &task, FactOrder order, int random_seed,
-    bool combine_facts)
-    : SubtaskGenerator(task),
-      fact_order(order),
+    FactOrder order, int random_seed, bool combine_facts)
+    : fact_order(order),
       combine_facts(combine_facts),
       rng(utils::get_rng(random_seed)) {
 }
@@ -190,9 +180,9 @@ static tuple<FactOrder, int> get_fact_order_arguments_from_options(
 }
 
 class TaskDuplicatorFeature
-    : public plugins::TaskIndependentFeature<TaskIndependentSubtaskGenerator> {
+    : public plugins::TypedFeature<SubtaskGenerator, TaskDuplicator> {
 public:
-    TaskDuplicatorFeature() : TaskIndependentFeature("original") {
+    TaskDuplicatorFeature() : TypedFeature("original") {
         document_title("No abstraction");
         document_synopsis(
             "Copies of the original task are used as subproblems.");
@@ -201,29 +191,28 @@ public:
             plugins::Bounds("1", "infinity"));
     }
 
-    virtual shared_ptr<TaskIndependentSubtaskGenerator> create_component(
+    virtual shared_ptr<TaskDuplicator> create_component(
         const plugins::Options &opts) const override {
-        return components::make_auto_task_independent_component<
-            TaskDuplicator, SubtaskGenerator>(opts.get<int>("copies"));
+        return plugins::make_shared_from_arg_tuples<TaskDuplicator>(
+            opts.get<int>("copies"));
     }
 };
 
 static plugins::FeaturePlugin<TaskDuplicatorFeature> _plugin_original;
 
 class GoalDecompositionFeature
-    : public plugins::TaskIndependentFeature<TaskIndependentSubtaskGenerator> {
+    : public plugins::TypedFeature<SubtaskGenerator, GoalDecomposition> {
 public:
-    GoalDecompositionFeature() : TaskIndependentFeature("goals") {
+    GoalDecompositionFeature() : TypedFeature("goals") {
         document_title("Abstraction by goals");
         document_synopsis(
             "For each goal atom of the original task one subproblem is generated having only the atom as its goal.");
         add_fact_order_option(*this);
     }
 
-    virtual shared_ptr<TaskIndependentSubtaskGenerator> create_component(
+    virtual shared_ptr<GoalDecomposition> create_component(
         const plugins::Options &opts) const override {
-        return components::make_auto_task_independent_component<
-            GoalDecomposition, SubtaskGenerator>(
+        return plugins::make_shared_from_arg_tuples<GoalDecomposition>(
             get_fact_order_arguments_from_options(opts));
     }
 };
@@ -231,9 +220,9 @@ public:
 static plugins::FeaturePlugin<GoalDecompositionFeature> _plugin_goals;
 
 class LandmarkDecompositionFeature
-    : public plugins::TaskIndependentFeature<TaskIndependentSubtaskGenerator> {
+    : public plugins::TypedFeature<SubtaskGenerator, LandmarkDecomposition> {
 public:
-    LandmarkDecompositionFeature() : TaskIndependentFeature("landmarks") {
+    LandmarkDecompositionFeature() : TypedFeature("landmarks") {
         document_title("Abstraction by landmarks");
         document_synopsis(
             "For each fact landmark of the delete relaxation of the original task one subproblem is generated having only the landmark as goal. This is a generalization of abstractions by goals.");
@@ -243,10 +232,9 @@ public:
             "true");
     }
 
-    virtual shared_ptr<TaskIndependentSubtaskGenerator> create_component(
+    virtual shared_ptr<LandmarkDecomposition> create_component(
         const plugins::Options &opts) const override {
-        return components::make_auto_task_independent_component<
-            LandmarkDecomposition, SubtaskGenerator>(
+        return plugins::make_shared_from_arg_tuples<LandmarkDecomposition>(
             get_fact_order_arguments_from_options(opts),
             opts.get<bool>("combine_facts"));
     }
@@ -255,7 +243,7 @@ public:
 static plugins::FeaturePlugin<LandmarkDecompositionFeature> _plugin_landmarks;
 
 static class SubtaskGeneratorCategoryPlugin
-    : public plugins::TypedCategoryPlugin<TaskIndependentSubtaskGenerator> {
+    : public plugins::TypedCategoryPlugin<SubtaskGenerator> {
 public:
     SubtaskGeneratorCategoryPlugin() : TypedCategoryPlugin("SubtaskGenerator") {
         document_synopsis(
