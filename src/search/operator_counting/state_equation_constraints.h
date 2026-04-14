@@ -42,8 +42,7 @@ class StateEquationConstraints : public ConstraintGenerator {
         named_vector::NamedVector<lp::LPConstraint> &constraints,
         double infinity);
 public:
-    StateEquationConstraints(
-        const std::shared_ptr<AbstractTask> &task, utils::Verbosity verbosity);
+    explicit StateEquationConstraints(utils::Verbosity verbosity);
     virtual void initialize_constraints(
         const std::shared_ptr<AbstractTask> &task,
         lp::LinearProgram &lp) override;

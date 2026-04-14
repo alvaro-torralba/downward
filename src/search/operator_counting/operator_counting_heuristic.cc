@@ -88,7 +88,7 @@ public:
                 " on Automated Planning and Scheduling (ICAPS 2014)",
                 "226-234", "AAAI Press", "2014"));
 
-        add_list_option<shared_ptr<TaskIndependentConstraintGenerator>>(
+        add_list_option<shared_ptr<ConstraintGenerator>>(
             "constraint_generators",
             "methods that generate constraints over operator-counting variables");
         add_option<bool>(
@@ -125,7 +125,7 @@ public:
         const plugins::Options &opts) const override {
         return components::make_auto_task_independent_component<
             OperatorCountingHeuristic, Evaluator>(
-            opts.get_list<shared_ptr<TaskIndependentConstraintGenerator>>(
+            opts.get_list<shared_ptr<ConstraintGenerator>>(
                 "constraint_generators"),
             opts.get<bool>("use_integer_operator_counts"),
             lp::get_lp_solver_arguments_from_options(opts),
