@@ -3,7 +3,6 @@
 #include "../operator_cost.h"
 
 #include "../task_utils/task_properties.h"
-
 #include <memory>
 
 using namespace std;
@@ -21,4 +20,5 @@ int CostAdaptedTask::get_operator_cost(int index, bool is_axiom) const {
     OperatorProxy op(*parent, index, is_axiom);
     return get_adjusted_action_cost(op, cost_type, parent_is_unit_cost);
 }
+
 }
